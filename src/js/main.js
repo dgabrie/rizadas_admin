@@ -4,11 +4,12 @@ function cambiarcontra(id,Nombre){
 
  $('#Modal_titulo_cambio').html('Cambiar Contraseña a usuario: '+Nombre)
  $("#Modal_cambio").modal()
-
-
-
-
 }
+
+
+
+
+
 //Funcion para mostrar contraseña
 function mostrarPassword(){
    var cambio = document.getElementById("txtPassword");
@@ -20,6 +21,10 @@ function mostrarPassword(){
      $('.icon').removeClass('fa fa-eye').addClass('fa fa-eye-slash');
   }
 }
+
+//
+
+
 
 
 
@@ -66,7 +71,7 @@ $("#form_cambio").on("submit",function(e){
 
 
 function cargar(nombrellamada,url,controlador){
-    $.post('../Backend/'+controlador+'.php',{
+    $.post('Backend/'+controlador+'.php',{
         request:'Listar',
         tabla:nombrellamada
 
@@ -79,6 +84,7 @@ function cargar(nombrellamada,url,controlador){
         }).done(function(response){
             $('#main').html(response);
             document.body.style.overflow = 'auto';
+
         }).fail(function(error){
             swal("error",'Fallo al traer la pagina','error');
         });

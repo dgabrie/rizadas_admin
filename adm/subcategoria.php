@@ -1,15 +1,20 @@
 <?php
-include "../Backend/Controller.php";
-    
+	session_start();
+
 if (isset($_SESSION['admin']['usuario'])) {
 $bandera=0;
 
-    if ( !array_search("1",$_SESSION['admin']['Permisos']) ) {
-        $bandera=1;
 
-    }
 
-	if ($bandera!=1) {
+if ( !array_search("1",$_SESSION['admin']['Permisos']) || array_search("3",$_SESSION['admin']['Permisos']) ) {
+    $bandera=1;
+
+}
+
+
+
+
+    if ($bandera!=1) {
 
 	
 		?>
@@ -31,17 +36,15 @@ $bandera=0;
 	<div class="row">
 			<div class="col-12 card table-responsive">
 				<button class="btn btn-primary" onclick="Agregar()" id="btnAgregar"><span class="fas fa-plus"></span> Agregar</button>
-				<h3>Administrar usuarios</h3>
+				<h3>Administrar SubSubcategorias</h3>
 				<table class="table" id="listado">
 					<thead  style="text-align:center;">
 						<tr>	
 							<th>Administrar</th>
-							<th>Nombre</th>
-							<th>Usuario</th>
-                            <th>Permiso</th>
+                            <th>Categoria</th>
+                            <th>Nombre</th>
                             <th>Estado</th>
-                            <th>Fecha Ultimo logueo</th>
-                            <th>Fecha Creación</th>
+							<th>Fecha Creación</th>
                             <th>Fecha Modificación</th>
              			</tr>
 					</thead>
@@ -49,7 +52,7 @@ $bandera=0;
 						<?php
 						foreach ($dato as $key => $value) {
 
-                            if ($value->{'estado'} == 'Activo') {
+                            if ($value->{'estado'} == '1') {
                                 $estado='ban';
                                 $titleestado='Desactivar';
                                 $colestado='danger';
@@ -60,25 +63,25 @@ $bandera=0;
                                 $colestado='success';
                                 $bgcolor='background-color:#ffafaf; color:black;';
                             }
-
-                                $estado2=$value->{'estado'};
+                            $colorCat="";
+                            if ($value->{"est_cat"} == '0'){
+                                $colorCat='background-color:#ffafaf; color:black;';
+                            }
 
                             echo '<tr  style="'.$bgcolor.'">
 									<td style="text-align:center;">
 										<div class="btn-group">
 										
-											<button title="'.$titleestado.' usuario" class="btn btn-'.$colestado.'" onclick="desactivar('.$value->{'id'}.')" > <span class="fas fa-'.$estado.'"></span></button>
-											<button title="Editar usuario" class="btn btn-warning" onclick="edita('.$value->{'id'}.')" > <span class="fas fa-pen"></span></button>
+											<button title="'.$titleestado.' Subcategoria" class="btn btn-'.$colestado.'" onclick="desactivar('.$value->{'id'}.')" > <span class="fas fa-'.$estado.'"></span></button>
+											<button title="Editar Subcategoria" class="btn btn-warning" onclick="edita('.$value->{'id'}.')" > <span class="fas fa-pen"></span></button>
 											
 										</div>
 									</td>
+									<td style="'.$colorCat.'">'.$value->{'categoria'}.'</td>
 									<td>'.$value->{'nombre'}.'</td>
-									<td>'.$value->{'usuario'}.'</td>
-									<td>'.$value->{'permiso'}.'</td>
-									<td>'.$estado2.'</td>
-									<td>'.$value->{'fecha_ult_log'}.'</td>
-									<td>'.$value->{'fecha_creacion'}.'</td>
-									<td>'.$value->{'fecha_modificacion'}.'</td>
+									<td>'.$value->{'estado1'}.'</td>
+									<td>'.$value->{'fec_creacion'}.'</td>
+									<td>'.$value->{'fec_modificacion'}.'</td>
 									
 									
 								</tr>';
@@ -95,69 +98,47 @@ $bandera=0;
 </div>
 	<script type="text/javascript">
 		function Agregar(){
-			$("#Modal_titulo_addusuario").html("Agregar usuario");
-			$('#Modal_addusuario').modal();
+			$("#Modal_titulo_addSubcategoria").html("Agregar Subcategoria");
+			$('#Modal_addSubcategoria').modal();
             document.getElementById("Agregar").reset();
-
 		}
 	</script>
-	<div class="modal fade" id="Modal_addusuario" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
+	<div class="modal fade" id="Modal_addSubcategoria" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel2" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="Modal_titulo_addusuario">Agregar usuario</h5>
+          <h5 class="modal-title" id="Modal_titulo_addSubcategoria">Agregar Subcategoria</h5>
           <button class="close" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
-        <div class="modal-body" id="Modal_body_addusuario">
+        <div class="modal-body" id="Modal_body_addSubcategoria">
         	<form id="Agregar">
-        		<input type="hidden" name="request" value="add_Usuario">
+        		<input type="hidden" name="request" value="CrearSubcategoria">
         		<input type="hidden" name="id" id="codigo" >
 
         		<div class="row">
-        		
+
+                    <div class="col-lg-12">
+                        <label class="h5">Categoria: </label>
+                        <select class="form-control" name="categoria" id="categoria" required="">
+                            <option value=""></option>
+
+                        </select>
+                    </div>
         			<div class="col-lg-12">
         				<label class="h5">Nombre: </label>
         				<input type="text" class="form-control" name="nombre" id="nombre" required="">
         			</div>
-                    <div class="col-lg-12">
-                        <label class="h5">Usuario: </label>
-                        <input type="text" class="form-control" name="usuario" id="usuario" required="">
-                    </div>
-                    <div class="col-lg-12">
-                        <label class="h5">Correo: </label>
-                        <input type="email" class="form-control" name="correo" id="correo" required="">
-                    </div>
-                    <div class="col-lg-12">
-                        <label class="h5">Contraseña: </label>
-                        <input type="text" class="form-control" name="pass" id="pass" required="">
-                    </div>
-                    <div class="col-lg-12">
-                        <label class="h5">Permisos: </label>
-                        <select class="form-control" name="permisos" id="permisos" required="" multiple>
-                            <?php
-                            $conn=new Controller();
-                            $permiso= $conn->mantenimiento("listarPermisos");
-                            var_dump($permiso[2]);
+                   <div class="col-lg-12">
+        				<label class="h5">Estado: </label>
+                       <select class="form-control" name="estado" id="estado" required="">
+                           <option value=""></option>
+                           <option value="1">Activo</option>
+                           <option value="0">Inactivo</option>
+                       </select>
+        			</div>
 
-                            foreach ($permiso[2] as $item) {
-
-                                echo "<option value='".$item['id']."'>".$item['permiso']."</option>";
-                            }
-
-                            ?>
-
-                        </select>
-                    </div>
-                    <div class="col-lg-12">
-                        <label class="h5">Estado: </label>
-                        <select class="form-control" name="estado" id="estado" required="">
-                            <option value="Activo">Activo</option>
-                            <option value="Inactivo">Inactivo</option>
-
-                        </select>
-                    </div>
 
         		</div>
         		
@@ -224,38 +205,49 @@ $bandera=0;
 
 		                ]
       				});
+    $("#Modal_titulo_addSubcategoria").html("Modificar Subcategoria");
+
+    function cargarSelect() {
+        const select = document.getElementById("categoria");
+
+        $.post('Backend/Controller.php', {
+            request: 'Listar',
+            tabla: 'AdminCategoriaActivo'
+
+        }).done(function (response) {
+            for (let i = 0; i < response.data.length; i++) {
+
+                const option = document.createElement("option");
+                option.value = response.data[i].id;
+                option.text = response.data[i].nombre;
+                select.appendChild(option);
+            }
+
+        }).fail(function (error) {
+            swal("error", 'No se puede obtener los datos', 'error');
+        });
+    }
+    window.onload = cargarSelect();
 
   	//==========================================================
 
 
   	function edita(id){
 
-			$("#Modal_titulo_addusuario").html("Modificar usuario");
+			$("#Modal_titulo_addSubcategoria").html("Modificar Subcategoria");
 		$.post('Backend/Controller.php',{
             request:'Listar',
-            tabla:'getusuario',
+            tabla:'getSubcategoria',
             id:id
 
 	    }).done(function(response){
 	        	
                 $('#codigo').val(response.data[0].id);
 				$('#nombre').val(response.data[0].nombre);
-                $('#usuario').val(response.data[0].usuario);
-                $('#correo').val(response.data[0].correo);
-                $('#pass').val("Contraseña encriptada");
+                $('#categoria').val(response.data[0].id_categoria);
                 $('#estado').val(response.data[0].estado);
-
-                var p=response.data[0].permiso;
-                if (p!=null){
-                     var c=response.data[0].permiso.split(";");
-                    for (let i = 0; i < c.length ; i++) {
-                        //$("#permisos").val(c[i]);
-                        $('select[name="permisos"] option[value="'+c[i]+'"').prop('selected',true);
-                    }
-                }
-
 				
-            $('#Modal_addusuario').modal();
+            $('#Modal_addSubcategoria').modal();
 	    }).fail(function(error){
 	            swal("error",'No se puede obtener los datos','error');
 	    });
@@ -266,7 +258,7 @@ $bandera=0;
     function desactivar(id){
         swal({
             title: "Estas segur@?",
-            text: "Estas apunto de des/activar el usuario!",
+            text: "Estas apunto de desactivar la Subcategoria!",
             icon: "warning",
             buttons: [
                 'No, Cancelar!',
@@ -275,36 +267,26 @@ $bandera=0;
             dangerMode: true,
         }).then(function(isConfirm) {
             if (isConfirm) {
-                $("#Modal_titulo_addusuario").html("Desactivar usuario");
+                $("#Modal_titulo_addSubcategoria").html("Desactivar Subcategoria");
                 $.post('Backend/Controller.php', {
                     request: 'Listar',
-                    tabla: 'getusuario',
+                    tabla: 'getSubcategoria',
                     id: id
 
                 }).done(function (response) {
 
                     $('#codigo').val(response.data[0].id);
                     $('#nombre').val(response.data[0].nombre);
-                    $('#usuario').val(response.data[0].usuario);
-                    $('#correo').val(response.data[0].correo);
-                    $('#pass').val("Contraseña encriptada");
-                    console.log(response.data[0].estado==="Activo");
+                    $('#categoria').val(response.data[0].categoria);
 
-                    if (response.data[0].estado==="Activo") {
-                        $('#estado').val('Inactivo');
+                    if (response.data[0].estado == 1) {
+                        $('#estado').val(0);
                     } else {
-                        $('#estado').val('Activo');
+                        $('#estado').val(1);
                     }
-
-                    var c=response.data[0].permiso.split(";");
-                    for (let i = 0; i < c.length ; i++) {
-                        //$("#permisos").val(c[i]);
-                        $('select[name="permisos"] option[value="'+c[i]+'"').prop('selected',true);
-                    }
-
                     $("#btnguardar").click();
 
-                    //$('#Modal_addusuario').modal();
+                    //$('#Modal_addSubcategoria').modal();
 
                 }).fail(function (error) {
                     console.log(error);
@@ -320,7 +302,7 @@ $('#Agregar').on("submit",function(e){
   
   e.preventDefault();
    $.ajax({
-      url:'Backend/Controller.php',
+       url:'Backend/Controller.php',
       method:'POST',
       data: new FormData(this),
       contentType:false,
@@ -329,20 +311,19 @@ $('#Agregar').on("submit",function(e){
       success: function(respuesta){
 
           if (respuesta.status=='Error') {
-              console.log(respuesta);
               swal({
                   title: "Error",
-                  text: "No se guardo el usuario, intentelo nuevamente.",
+                  text: "No se guardo el Subcategoria, intentelo nuevamente.",
                   icon: "error"
               })
       }else{
-      		$('#Modal_addusuario').modal('hide');
+      		$('#Modal_addSubcategoria').modal('hide');
           swal({
               title: "Éxito",
-              text: "Se guardo el usuario.",
+              text: "Se guardo el Subcategoria.",
               icon: "success",
           }).then((seguro) => {
-              cargar('ListarUsuarios','adm/usuarios.php','Controller')
+              cargar('AdminSubCategoria','adm/subcategoria.php','Controller');
           });
       }
           

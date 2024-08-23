@@ -28,12 +28,6 @@ class Controller extends db
     }
 
 
-    //----------------------------------------------------------------------------------------
-    public function CrearCita($id,$doctor,$paciente,$fecha,$Hora,$motivo,$estado,$nombre="",$telefono="",$correo="")
-    {
-        $Data = db::CrearCita($id,$doctor,$paciente,$fecha,$Hora,$motivo,$estado,$nombre,$telefono,$correo);
-        return $Data;
-    }
 
     //----------------------------------------------------------------------------------------
     public function add_Usuario($id, $nombre,$usuario,$pass,$correo,$permiso,$estado)
@@ -42,55 +36,33 @@ class Controller extends db
         return $Data;
     }
 
-
-
-      //----------------------------------------------------------------------------------------
-    public function CrearPaciente($id,$nombre,$apellido,$telefono,$correo,$fecha_nac,$nombre_emergencia,$telefono_emergencia,$sexo, $inventario)
+    //----------------------------------------------------------------------------------------
+    public function CrearCategoria($id, $nombre,$estado)
     {
-        $Data = db::CrearPaciente($id,$nombre,$apellido,$telefono,$correo,$fecha_nac,$nombre_emergencia,$telefono_emergencia,$sexo,$inventario);
+        $Data = db::CrearCategoria($id, $nombre,$estado)   ;
         return $Data;
     }
 
     //----------------------------------------------------------------------------------------
-    public function CrearInventario($id,$nombre,$descripcion,$tipo, $estado)
+    public function CrearSubcategoria($id, $idcategoria, $nombre,$estado)
     {
-        $Data = db::CrearInventario($id,$nombre,$descripcion,$tipo, $estado);
+        $Data = db::CrearSubcategoria($id, $idcategoria, $nombre,$estado);
         return $Data;
     }
 
-      //----------------------------------------------------------------------------------------
-    public function agregarAtendido($id, $id_paciente, $procedimiento,$atencionesdat,$agendar_cita, $doctor="", $motivo="", $fecha="", $Hora="")
+    //----------------------------------------------------------------------------------------
+    public function CrearMarca($id, $nombre,$estado)
     {
-        $Data = db::agregarAtendido($id, $id_paciente, $procedimiento,$atencionesdat, $agendar_cita,  $doctor, $motivo, $fecha, $Hora);
+        $Data = db::CrearMarca($id, $nombre,$estado)   ;
         return $Data;
     }
 
-      //----------------------------------------------------------------------------------------
-    public function cancelarCitasAnteriores()
+    //----------------------------------------------------------------------------------------
+    public function CrearTemporada($id, $nombre,$estado)
     {
-        $Data = db::cancelarCitasAnteriores();
+        $Data = db::CrearTemporada($id, $nombre,$estado)   ;
         return $Data;
     }
-     //---------------------------------------------------------------------------------------
-
-    public function ReporteCita($fechaI, $fechaF, $id_doc){
-        $Data = db::ReporteCita($fechaI, $fechaF, $id_doc);
-        return $Data;
-    }
-
-    //---------------------------------------------------------------------------------------
-
-    public function ReporteFinanciero($fechaI, $fechaF, $id_doc){
-        $Data = db::ReporteFinanciero($fechaI, $fechaF, $id_doc);
-        return $Data;
-    }
-    //---------------------------------------------------------------------------------------
-
-    public function ReporteHorarioSR($fechaI, $id_doc){
-        $Data = db::ReporteHorarioSR($fechaI, $id_doc);
-        return $Data;
-    }
-  
 
 }
 
@@ -161,37 +133,6 @@ if (isset($_POST['request'])) {
             echo json_encode($response);
             break;
 
-         
-
-
- //------------------------------------------------------------------------------------------
-
-
-
-case 'agregarAtendido':
-            
-            if(!isset($doctor)){ $doctor=""; }
-            if(!isset($motivo)){ $motivo=""; }
-            if(!isset($fecha)){  $fecha="";  }
-            if(!isset($Hora)){   $Hora="";   }
-
-
-            $Data = $Controller->agregarAtendido($id, $id_paciente, $procedimiento,$atencionesdat, $agendar_cita,  $doctor, $motivo, $fecha, $Hora);
-            if ($Data[0] == true) {
-                $response['status'] = "success";
-            } else {
-                $response['status'] = "Error";
-            }
-            $response['message'] = $Data[1];
-            
-            if ($Data[2]=='Exito') {
-                $response['data'] =["Exito","Se guardo el servicio exitosamente","success"];
-               
-            }else{
-                 $response['data'] =["Error",'al guardar el servicio, contacte a soporte',"error"];
-            }
-            echo json_encode($response);
-            break;
 
          //------------------------------------------------------------------------------------------
 
@@ -200,11 +141,12 @@ case 'agregarAtendido':
          case 'add_Usuario':
 
              if(!isset($pass)){ $pass="Contraseña encriptada"; }
-             if(!isset($id)){ $motivo=0; }
+             if(!isset($id)){ $id=0; }
+             if($id==""){ $id=0; }
 
 
 
-             $Data = $Controller->add_Usuario($id, $nombre,$usuario,$pass,$correo,$permiso,$estado)   ;
+             $Data = $Controller->add_Usuario($id, $nombre,$usuario,$pass,$correo,$permisos,$estado)   ;
              if ($Data[0] == true) {
                  $response['status'] = "success";
              } else {
@@ -216,100 +158,106 @@ case 'agregarAtendido':
                  $response['data'] =["Exito","Se guardo el servicio exitosamente","success"];
 
              }else{
-                 $response['data'] =["Error",'al guardar el servicio, contacte a soporte',"error"];
+                 $response['data'] =["Error","al guardar el servicio, contacte a soporte ","error"];
              }
              echo json_encode($response);
              break;
 
+
+
 //------------------------------------------------------------------------------------------
+         case 'CrearCategoria':
 
-case 'CrearCita':
-            if (!isset($nombre)) { $nombre=""; }
-            if (!isset($telefono)) { $telefono=""; }
-            if (!isset($correo)) { $correo=""; }
 
-            $Data = $Controller->CrearCita($id,$doctor,$paciente,$fecha,$Hora,$motivo,$estado,$nombre,$telefono,$correo);
+            if(!isset($id)){ $id=0; }
+            if($id==""){ $id=0; }
+
+            $Data = $Controller->CrearCategoria($id, $nombre,$estado)   ;
             if ($Data[0] == true) {
                 $response['status'] = "success";
             } else {
                 $response['status'] = "Error";
             }
-            $response['message'] = $Data[1];
-            
+            $response['message'] = $Data[2];
+
             if ($Data[2]=='Exito') {
-                $response['data'] =["Exito","Se guardo la cita exitosamente","success"];
-               
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
             }else{
-                 $response['data'] =["Error",$Data[0][1],"error"];
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
             }
             echo json_encode($response);
             break;
-//------------------------------------------------------------------------------------------
 
-        case 'cancelarCitasAnteriores':
-            
-            $Data = $Controller->cancelarCitasAnteriores();
+        //------------------------------------------------------------------------------------------
+        case 'CrearSubcategoria':
+
+
+            if(!isset($id)){ $id=0; }
+            if($id==""){ $id=0; }
+
+            $Data = $Controller->CrearSubcategoria($id, $categoria, $nombre,$estado) ;
             if ($Data[0] == true) {
                 $response['status'] = "success";
             } else {
                 $response['status'] = "Error";
             }
-            $response['message'] = $Data[1];
-            
+            $response['message'] = $Data[2];
+
             if ($Data[2]=='Exito') {
-                $response['data'] =["Exito","Se cancelaron las citas exitosamente","success"];
-               
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
             }else{
-                 $response['data'] =["Error",'al cancelar las citas, contacte a soporte',"error"];
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
             }
             echo json_encode($response);
             break;
+        //------------------------------------------------------------------------------------------
+        case 'CrearMarca':
 
 
-//------------------------------------------------------------------------------------------
+            if(!isset($id)){ $id=0; }
+            if($id==""){ $id=0; }
 
-case 'CrearPaciente':
-            
-            $Data = $Controller->CrearPaciente($id,$nombre,$apellido,$telefono,$correo,$fecha_nac,$nombre_emergencia,$telefono_emergencia,$sexo,$inventariodata);
+            $Data = $Controller->CrearMarca($id, $nombre,$estado) ;
             if ($Data[0] == true) {
                 $response['status'] = "success";
             } else {
                 $response['status'] = "Error";
             }
-            $response['message'] = $Data[1];
-            
+            $response['message'] = $Data[2];
+
             if ($Data[2]=='Exito') {
-                $response['data'] =["Exito","Se guardo el servicio exitosamente","success"];
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
 
             }else{
-                 $response['data'] =["Error",'al guardar el servicio, contacte a soporte',"error",$Data];
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
             }
             echo json_encode($response);
             break;
+        //------------------------------------------------------------------------------------------
+        case 'CrearTemporada':
 
-//------------------------------------------------------------------------------------------
 
-        case 'CrearInventario':
+            if(!isset($id)){ $id=0; }
+            if($id==""){ $id=0; }
 
-            $Data = $Controller->CrearInventario($id,$nombre,$descripcion,$tipo, $estado);
+            $Data = $Controller->CrearTemporada($id, $nombre,$estado) ;
             if ($Data[0] == true) {
                 $response['status'] = "success";
             } else {
                 $response['status'] = "Error";
             }
-            $response['message'] = $Data[1];
+            $response['message'] = $Data[2];
 
             if ($Data[2]=='Exito') {
-                $response['data'] =["Exito","Se guardo el servicio exitosamente","success"];
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
 
             }else{
-                $response['data'] =["Error",'al guardar el servicio, contacte a soporte',"error",$Data];
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
             }
             echo json_encode($response);
             break;
-
-
-
  //------------------------------------------------------------------------------------------ 
         case 'inicio':
             
@@ -364,7 +312,7 @@ case 'CrearPaciente':
                 $response['data'] =["Exito","Bienvenido ".$_SESSION['admin']['Nombre'],"success"];
                
             }else{
-                 $response['data'] =["Error",$Data[1],"error"];
+                 $response['data'] =["Error",$Data[1],"error", $Data[2]];
             }
             echo json_encode($response);
             break;

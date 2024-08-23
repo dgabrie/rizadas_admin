@@ -17,43 +17,33 @@
 
                     <?php
 
-                     if ($permiso!=4) {
+                     if (!array_search(4, $permiso)) {
                     ?>
-                        <li>
-                            <a class="collapse-item" href="#" onclick="cargar('AdminClientes','adm/Clientes.php','Controller')"><i class="fa fa-users nav_icon"></i> Crear Pacientes</a>
-                        </li>
-                         <li>
-                             <a class="collapse-item" href="#" onclick="cargar('AdminInventario','adm/inventario.php','Controller')"><i class="fa fa-cogs nav_icon"></i> Inventario Precios</a>
-                         </li>
-
-                    <?php
-                    }
-                    ?>
-                        <li>
-                            <a class="collapse-item" href="#" onclick="cargar('AdminCitas2','adm/Citas.php','Controller')"> <i class="fa fa-calendar nav_icon"></i> Crear Cita</a>
-                        </li>
-                        <li>
-                            <a class="collapse-item" href="#" onclick="cargar('ReporteCitas','adm/reporteCitas.php','Controller')"><i class="fa fa-book-open nav_icon"></i> Reporte de Cita</a>
-                        </li>
-                        <li>
-                             <a class="collapse-item" href="#" onclick="cargar('AtenderCitas','adm/AtenderCitas.php','Controller')"><i class="fa fa-comment nav_icon"></i> Atender Cita</a>
-                        </li>
-                        <?php
-                         if ($permiso!=4) {
-                        ?>
+                    <li>
+                        <a href="#"><i class="fa fa-cogs nav_icon"></i>Mantenimiento <span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level collapse">
                             <li>
-                                 <a class="collapse-item" href="#" onclick="cargar('VerHistorialTodos','adm/Historial.php','Controller')"><i class="fa fa-book-open nav_icon"></i> Seguimiento Dental</a>
+                                <a class="collapse-item" href="#" onclick="cargar('AdminCategoria','adm/categoria.php','Controller')"><i class="fa fa-cogs nav_icon"></i>Categorias</a>
                             </li>
                              <li>
-                                 <a class="collapse-item" href="#" onclick="cargar('ReporteFinanciero','adm/reporteFinanciero.php','Controller')"><i class="fa fa-money-bill nav_icon"></i> Reporte Financiero</a>
-                             </li>
-                             <li>
-                                 <a class="collapse-item" href="#" onclick="cargar('ReporteHorarioSR','adm/reporteHorarioSR.php','Controller')"><i class="fa fa-list nav_icon"></i> Reporte Horario <br> sin reservar</a>
-                             </li>
-                             <li>
-                                 <a class="collapse-item" href="#" onclick="cargar('ListarUsuarios','adm/usuarios.php','Controller')"><i class="fa fa-users nav_icon"></i> Usuarios</a>
+                                 <a class="collapse-item" href="#" onclick="cargar('AdminSubCategoria','adm/subcategoria.php','Controller')"><i class="fa fa-cogs nav_icon"></i> SubCategorias</a>
                              </li>
 
+                             <li>
+                                 <a class="collapse-item" href="#" onclick="cargar('AdminMarca','adm/marca.php','Controller')"><i class="fa fa-copyright nav_icon"></i> Marca</a>
+                             </li>
+
+                             <li>
+                                 <a class="collapse-item" href="#" onclick="cargar('AdminTemporada','adm/temporada.php','Controller')"><i class="fa fa-book nav_icon"></i> Temporada</a>
+                             </li>
+                             <li>
+                                 <a class="collapse-item" href="#" onclick="cargar('AdminProducto','adm/producto.php','Controller')"><i class="fa fa-book nav_icon"></i> Productos</a>
+                             </li>
+                                 <li>
+                                     <a class="collapse-item" href="#" onclick="cargar('ListarUsuarios','adm/usuarios.php','Controller')"><i class="fa fa-users nav_icon"></i> Usuarios</a>
+                                 </li>
+                        </ul>
+                    </li>
                         <?php
                         }
                         ?>
