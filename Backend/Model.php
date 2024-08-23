@@ -419,6 +419,168 @@ class db extends ConexionDB
 
     }
 
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function AdicionalProducto($id, $adicionales)
+    {
+        $queryDel = "DELETE FROM inv_variable WHERE id_producto=?";
+
+        $queryIns = "INSERT INTO inv_variable (id_producto, nom_campo, valor_campo) values (?,?,?)";
+        //var_dump($query);
+        try{
+            $adicional=explode(",", $adicionales);
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($queryDel);
+            $sentencia->bindParam(1, $id);
+
+            if($sentencia->execute()){
+
+                $sentenciaInsert = $conexion->prepare($queryIns);
+                $sentenciaInsert->bindParam(1, $id);
+                $sentenciaInsert->bindParam(2, $adicional[0]);
+                $sentenciaInsert->bindParam(3, $adicional[1]);
+                $sentenciaInsert->execute();
+
+
+                return [TRUE,"Se guardo el registro con exito!","Exito"];
+
+           }else{
+                return [FALSE,"Error al guardar el dato error:". $sentencia->errorInfo()[0],$sentencia->errorInfo()];
+            }
+        }catch(PDOException $e){
+            return [FALSE,"Error al obtener los datos",$e->getMessage()];
+        }
+
+
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function SubCategoria_Producto($id, $id_subcategoria)
+    {
+        $queryDel = "DELETE FROM inv_subcategoria WHERE id_producto=?";
+
+        $queryIns = "INSERT INTO inv_subcategoria (id_producto, id_subcategoria) values (?,?)";
+        //var_dump($query);
+        try{
+
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($queryDel);
+            $sentencia->bindParam(1, $id);
+
+            if($sentencia->execute()){
+
+                $sentenciaInsert = $conexion->prepare($queryIns);
+
+                for ($i = 0; $i <count($id_subcategoria) ; $i++) {
+                    $sentenciaInsert->bindParam(1, $id);
+                    $sentenciaInsert->bindParam(2, $id_subcategoria[$i]);
+
+                    $sentenciaInsert->execute();
+                }
+
+                return [TRUE,"Se guardo el registro con exito!","Exito"];
+
+            }else{
+                return [FALSE,"Error al guardar el dato error:". $sentencia->errorInfo()[0],$sentencia->errorInfo()];
+            }
+        }catch(PDOException $e){
+            return [FALSE,"Error al obtener los datos",$e->getMessage()];
+        }
+
+
+    }
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function AdicionalImagen($id, $imagen)
+    {
+        $queryDel = "DELETE FROM inv_imagen WHERE id_producto=?";
+
+        $queryIns = "INSERT INTO inv_imagen (id_producto, imagen) values (?,?)";
+        //var_dump($query);
+        try{
+
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($queryDel);
+            $sentencia->bindParam(1, $id);
+
+            if($sentencia->execute()){
+                for ($i = 0; $i <count($imagen) ; $i++) {
+                    $sentenciaInsert = $conexion->prepare($queryIns);
+                    $sentenciaInsert->bindParam(1, $id);
+                    $sentenciaInsert->bindParam(2, $imagen[$i]);
+                    $sentenciaInsert->execute();
+                }
+
+
+
+                return [TRUE,"Se guardo el registro con exito!","Exito"];
+
+            }else{
+                return [FALSE,"Error al guardar el dato error:". $sentencia->errorInfo()[0],$sentencia->errorInfo()];
+            }
+        }catch(PDOException $e){
+            return [FALSE,"Error al obtener los datos",$e->getMessage()];
+        }
+
+
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)
+    {
+        if ($id!=0 && $id!='') {
+            $query = "UPDATE inventario
+            set id_marca=?,
+                nombre=?,
+                estado=?
+            WHERE id=?";
+        }else{
+            $query="INSERT INTO inventario (id_marca, nombre, estado) VALUES (?,?,?)";
+        }
+
+
+        //var_dump($query);
+        try{
+
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($query);
+            $sentencia->bindParam(1, $marca);
+            $sentencia->bindParam(2, $nombre);
+            $sentencia->bindParam(3, $estado);
+
+            if ($id!=0 && $id!='') {
+                $sentencia->bindParam(3, $id);
+            }
+
+
+            if($sentencia->execute()){
+                if ($id!=0 && $id!='') {
+                    $id=$conexion->lastInsertId();
+                }
+
+                if (strlen($adicionales)>0){
+                    $adicional=explode("|", $adicionales);
+                    $this->AdicionalProducto($id, $adicional);
+                }
+
+                if (count($imagenes)>0){
+                    $this->AdicionalImagen($id, $imagenes);
+                }
+
+                if (count($subcategoria)>0){
+                    $this->SubCategoria_Producto($id, $subcategoria);
+                }
+
+                return [TRUE,"Se guardo el registro con exito!","Exito"];
+
+
+            }else{
+                return [FALSE,"Error al guardar el dato error:". $sentencia->errorInfo()[0],$sentencia->errorInfo()];
+            }
+        }catch(PDOException $e){
+            return [FALSE,"Error al obtener los datos",$e->getMessage()];
+        }
+
+
+    }
 
     //------------------------------------------------------------------------------------------------------------------------------//
     protected function add_Usuario($id, $nombre,$usuario,$pass,$correo,$permiso,$estado){

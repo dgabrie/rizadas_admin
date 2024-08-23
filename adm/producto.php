@@ -101,7 +101,10 @@ if ( !array_search("1",$_SESSION['admin']['Permisos']) || array_search("3",$_SES
 			$("#Modal_titulo_addProducto").html("Agregar Producto");
 			$('#Modal_addProducto').modal();
             $('#subcategoria').val(null).trigger('change');
+            $('#temporada').val(null).trigger('change');
             document.getElementById("Agregar").reset();
+            $("#frames").html("");
+
 
         }
 	</script>
@@ -118,6 +121,8 @@ if ( !array_search("1",$_SESSION['admin']['Permisos']) || array_search("3",$_SES
         	<form id="Agregar">
         		<input type="hidden" name="request" value="CrearProducto">
         		<input type="hidden" name="id" id="codigo" >
+
+                <input type="hidden" name="adicionales" id="adicionales" >
 
         		<div class="row">
 
@@ -229,7 +234,17 @@ if ( !array_search("1",$_SESSION['admin']['Permisos']) || array_search("3",$_SES
                   });
               });
 
+      function reset (idtabla) {
+          var table = document.getElementById(idtabla);
+          var rowCount = table.rows.length;
+          console.log(rowCount)
+          if (rowCount>1) {
+              for (var i = 1; i < rowCount; i++) {
+                  eliminarFila('TABLA2');
+              }
+          }
 
+      }
   	$('#listado').DataTable({"language": {
       					"url": "js/Spanish.json"
       				},
@@ -430,6 +445,30 @@ if ( !array_search("1",$_SESSION['admin']['Permisos']) || array_search("3",$_SES
 $('#Agregar').on("submit",function(e){
 
     e.preventDefault();
+
+    $("#btnsave").attr('disabled','disabled');
+    var idtabla='tbl_adicionales';
+    var table = document.getElementById(idtabla);
+    var rowCount = table.rows.length;
+    var adicionales_select='';
+
+    if (rowCount > 0) {
+
+        for (var i = 0; i < rowCount; i++) {
+            var nombre = $('#txtNombre_' + idtabla + '_' + i).val();
+            var valor = $('#txtValor_' + idtabla + '_' + i).val();
+
+            if (i == 0) {
+                adicionales_select = nombre + "|" + valor;
+            } else {
+                adicionales_select = adicionales_select + "#" + nombre + "|" + valor;
+            }
+        }
+
+        $("#adicionales").val(adicionales_select);
+    }
+
+
    $.ajax({
        url:'Backend/Controller.php',
       method:'POST',

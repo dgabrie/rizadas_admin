@@ -36,6 +36,13 @@ class Controller extends db
         return $Data;
     }
 
+
+    //----------------------------------------------------------------------------------------
+    public function CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)
+    {
+        $Data = db::CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)   ;
+        return $Data;
+    }
     //----------------------------------------------------------------------------------------
     public function CrearCategoria($id, $nombre,$estado)
     {
@@ -164,6 +171,30 @@ if (isset($_POST['request'])) {
              break;
 
 
+
+//------------------------------------------------------------------------------------------
+         case 'CrearProducto':
+
+
+             if(!isset($id)){ $id=0; }
+             if($id==""){ $id=0; }
+
+             $Data = $Controller->  CrearProducto($id, $marca, $nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)  ;
+             if ($Data[0] == true) {
+                 $response['status'] = "success";
+             } else {
+                 $response['status'] = "Error";
+             }
+             $response['message'] = $Data[2];
+
+             if ($Data[2]=='Exito') {
+                 $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
+             }else{
+                 $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
+             }
+             echo json_encode($response);
+             break;
 
 //------------------------------------------------------------------------------------------
          case 'CrearCategoria':
