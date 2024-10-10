@@ -36,11 +36,19 @@ class Controller extends db
         return $Data;
     }
 
+    //----------------------------------------------------------------------------------------
+    public function AdicionalImagen($id, $imagenes, $tipo)
+    {
+        $Data = db::AdicionalImagen($id, $imagenes, $tipo);
+        return $Data;
+    }
+
+
 
     //----------------------------------------------------------------------------------------
-    public function CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)
+    public function CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes, $tipo)
     {
-        $Data = db::CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)   ;
+        $Data = db::CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes, $tipo)   ;
         return $Data;
     }
     //----------------------------------------------------------------------------------------
@@ -65,11 +73,30 @@ class Controller extends db
     }
 
     //----------------------------------------------------------------------------------------
+    public function CrearEtapa($id, $nombre,$etapa_sig,$estado)
+    {
+        $Data = db::CrearEtapa($id, $nombre,$etapa_sig,$estado)   ;
+        return $Data;
+    }
+    //----------------------------------------------------------------------------------------
+    public function AgregarInventario($producto, $cantidad,$precio_compra,$precio_venta, $fec_venc, $lote)
+    {
+        $Data = db::AgregarInventario($producto, $cantidad,$precio_compra,$precio_venta, $fec_venc, $lote);
+        return $Data;
+    }
+    //----------------------------------------------------------------------------------------
     public function CrearTemporada($id, $nombre,$estado)
     {
         $Data = db::CrearTemporada($id, $nombre,$estado)   ;
         return $Data;
     }
+
+    public function CrearPromocion(int $id, $nombre, $descripcion, $tipo_promo, array $tipo, $desc_envio, $desc_prod, $fecha_inicio, $fecha_fin, $estado)
+    {
+        $Data = db::CrearPromocion($id, $nombre, $descripcion, $tipo_promo, $tipo, $desc_envio, $desc_prod, $fecha_inicio, $fecha_fin, $estado);
+        return $Data;
+    }
+
 
 }
 
@@ -170,7 +197,44 @@ if (isset($_POST['request'])) {
              echo json_encode($response);
              break;
 
+//------------------------------------------------------------------------------------------
+        case 'AgregarImagenProducto':
 
+
+
+            if (isset($_FILES["imagenes_add"]["name"])) {
+                $img=$_FILES["imagenes_add"]["name"];
+            }else{
+                $img=[];
+                $imagenes=[];
+                $tipo=[];
+            }
+
+
+            for ($i = 0; $i < count($img); $i++) {
+                $imagenes[$i]=file_get_contents($_FILES["imagenes_add"]["tmp_name"][$i]);
+                $tipo[$i]=$_FILES["imagenes_add"]['type'][$i];
+            }
+
+
+
+            $Data = $Controller->  AdicionalImagen($id, $imagenes, $tipo);
+
+            if ($Data[0] == true) {
+                $response['status'] = "success";
+            } else {
+                $response['status'] = "Error";
+            }
+            $response['message'] = $Data[2];
+
+            if ($Data[2]=='Exito') {
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
+            }else{
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
+            }
+            echo json_encode($response);
+            break;
 
 //------------------------------------------------------------------------------------------
          case 'CrearProducto':
@@ -178,8 +242,28 @@ if (isset($_POST['request'])) {
 
              if(!isset($id)){ $id=0; }
              if($id==""){ $id=0; }
+             if(!isset($temporada)){ $temporada=[]; }
+             if($temporada==null){ $temporada=[]; }
 
-             $Data = $Controller->  CrearProducto($id, $marca, $nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)  ;
+             if (isset($_FILES["imagenes"]["name"])) {
+                 $img=$_FILES["imagenes"]["name"];
+             }else{
+                    $img=[];
+                    $imagenes=[];
+                    $tipo=[];
+            }
+
+
+             for ($i = 0; $i < count($img); $i++) {
+                 $imagenes[$i]=file_get_contents($_FILES["imagenes"]["tmp_name"][$i]);
+                 $tipo[$i]=$_FILES["imagenes"]['type'][$i];
+             }
+
+
+
+             $Data = $Controller->  CrearProducto($id, $marca, $nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes, $tipo)  ;
+
+
              if ($Data[0] == true) {
                  $response['status'] = "success";
              } else {
@@ -196,7 +280,35 @@ if (isset($_POST['request'])) {
              echo json_encode($response);
              break;
 
-//------------------------------------------------------------------------------------------
+
+        //------------------------------------------------------------------------------------------
+        case 'CrearPromocion':
+
+
+            if(!isset($id)){ $id=0; }
+            if($id==""){ $id=0; }
+
+            if(!isset($tipo)){ $tipo=[]; }
+
+
+            $Data = $Controller->CrearPromocion($id, $nombre, $descripcion, $tipo_promo, $tipo, $desc_env, $desc_prod, $fec_inicio, $fec_fin, $estado);
+            if ($Data[0] == true) {
+                $response['status'] = "success";
+            } else {
+                $response['status'] = "Error";
+            }
+            $response['message'] = $Data[2];
+
+            if ($Data[2]=='Exito') {
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
+            }else{
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
+            }
+            echo json_encode($response);
+            break;
+
+             //------------------------------------------------------------------------------------------
          case 'CrearCategoria':
 
 
@@ -251,6 +363,60 @@ if (isset($_POST['request'])) {
             if($id==""){ $id=0; }
 
             $Data = $Controller->CrearMarca($id, $nombre,$estado) ;
+            if ($Data[0] == true) {
+                $response['status'] = "success";
+            } else {
+                $response['status'] = "Error";
+            }
+            $response['message'] = $Data[2];
+
+            if ($Data[2]=='Exito') {
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
+            }else{
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
+            }
+            echo json_encode($response);
+            break;
+
+
+        //------------------------------------------------------------------------------------------
+        case 'CrearEtapa':
+
+
+            if(!isset($id)){ $id=0; }
+            if($id==""){ $id=0; }
+            if (!isset($etapa_sig)) {
+                $etapa_sig=0;
+            }
+            $Data = $Controller->CrearEtapa($id, $nombre,$etapa_sig,$estado)  ;
+            if ($Data[0] == true) {
+                $response['status'] = "success";
+            } else {
+                $response['status'] = "Error";
+            }
+            $response['message'] = $Data[2];
+
+            if ($Data[2]=='Exito') {
+                $response['data'] =["Exito","Se guardo el valor exitosamente","success"];
+
+            }else{
+                $response['data'] =["Error","al guardar el valor, contacte a soporte ","error"];
+            }
+            echo json_encode($response);
+            break;
+
+
+        //------------------------------------------------------------------------------------------
+        case 'AgregarInventario':
+
+
+
+            if (!isset($fec_venc)) { $fec_venc=null; }
+            if (!isset($lote)) { $lote=null; }
+
+            $Data = $Controller->AgregarInventario( $producto,$cantidad,$precio_compra,$precio_venta,$fec_venc,$lote)  ;
+
             if ($Data[0] == true) {
                 $response['status'] = "success";
             } else {

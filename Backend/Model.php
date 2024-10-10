@@ -11,6 +11,84 @@ class db extends ConexionDB
 {
 
 
+    protected function CrearPromocion(int $id, $nombre, $descripcion, $tipo_promo, array $tipo, $desc_envio, $desc_prod, $fecha_inicio, $fecha_fin, $estado)
+    {
+        if ($id != 0 && $id != '') {
+            $query = "UPDATE promociones
+            set nombre=?,
+                descripcion=?,
+                tipo_promo=?,
+                id_tipo=?,
+                desc_envio=?,
+                desc_producto=?,
+                fecha_inicio=?,
+                fecha_fin=?,
+                estado=?
+            WHERE id=?";
+        } else {
+            $query = "INSERT INTO promociones (nombre, descripcion, tipo_promo, id_tipo, desc_envio, desc_producto, fecha_inicio, fecha_fin, estado) VALUES (?,?,?,?,?,?,?,?,?)";
+        }
+
+        $tipo_p = "";
+        for ($i = 0; $i < count($tipo); $i++) {
+            if ($i!=0){
+                $tipo_p=$tipo_p.",";
+            }
+            $tipo_p=$tipo_p.$tipo[$i];
+
+        }
+
+        try {
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($query);
+            $sentencia->bindParam(1, $nombre);
+            $sentencia->bindParam(2, $descripcion);
+            $sentencia->bindParam(3, $tipo_promo);
+            $sentencia->bindParam(4, $tipo_p);
+            $sentencia->bindParam(5, $desc_envio);
+            $sentencia->bindParam(6, $desc_prod);
+            $sentencia->bindParam(7, $fecha_inicio);
+            $sentencia->bindParam(8, $fecha_fin);
+            $sentencia->bindParam(9, $estado);
+
+            if ($id != 0 && $id != '') {
+                $sentencia->bindParam(10, $id);
+            }
+
+            if ($sentencia->execute()) {
+                return [TRUE, "Se guardo el registro con exito!", "Exito"];
+            } else {
+                return [FALSE, "Error al guardar el dato error:" . $sentencia->errorInfo()[0], $sentencia->errorInfo()];
+            }
+        } catch (PDOException $e) {
+            return [FALSE, "Error al obtener los datos", $e->getMessage()];
+        }
+    }
+
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function AgregarInventario($producto, $cantidad, $precio_compra, $precio_venta, $fec_venc, $lote)
+    {
+        $query = "INSERT INTO inv_entrada (id_producto, cantidad, precio_compra, precio_venta , fecha_vencimiento, lote) VALUES (?,?,?,?,?,?)";
+        try {
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($query);
+            $sentencia->bindParam(1, $producto);
+            $sentencia->bindParam(2, $cantidad);
+            $sentencia->bindParam(3, $precio_compra);
+            $sentencia->bindParam(4, $precio_venta);
+            $sentencia->bindParam(5, $fec_venc);
+            $sentencia->bindParam(6, $lote);
+
+            if ($sentencia->execute()) {
+                return [TRUE, "Se guardo el registro con exito!", "Exito"];
+            } else {
+                return [FALSE, "Error al guardar el dato error:" . $sentencia->errorInfo()[0], $sentencia->errorInfo()];
+            }
+        } catch (PDOException $e) {
+            return [FALSE, "Error al obtener los datos", $e->getMessage()];
+        }
+    }
+
     protected function ACENTOS(){
 
        $conexion  = ConexionDB::ConexionLocalPDO();
@@ -31,6 +109,18 @@ class db extends ConexionDB
     //                                        REGISTRO                                              //
     //                                                                                              //
     //----------------------------------------------------------------------------------------------//
+            //------------------------------------------------------------------------------//
+            case 'DesactivaProducto':
+                $sql="UPDATE inventario SET estado=(case when estado=1 then 0 else 1 end) WHERE id=?";
+                break;
+            //------------------------------------------------------------------------------//
+            case 'EliminarImgProducto':
+                $sql="DELETE FROM inv_imagen WHERE id=?";
+                break;
+            //------------------------------------------------------------------------------//
+            case 'EliminarinvProducto':
+                $sql="DELETE FROM inv_entrada WHERE id=?";
+                break;
             //------------------------------------------------------------------------------//
             case 'ListarUsuarios':
                 $sql="SELECT group_concat(p.permiso SEPARATOR ', ') permiso,u.id, u.nombre, u.usuario, u.correo,  u.estado, u.fecha_ult_log, u.fecha_creacion, u.fecha_modificacion
@@ -55,9 +145,90 @@ class db extends ConexionDB
                 break;
 
             //------------------------------------------------------------------------------//
+            case 'AdminEtapa':
+                $sql="SELECT a.id,a.nombre,  a.estado, CONCAT('[',GROUP_CONCAT(CONCAT('{ ".'"id"'.":',b.id_etapa,', ".'"id_sig"'.":',b.etapa_next,', ".'"nombre": '.'"'."'".",c.nombre,"."'".'"'.", ". '"texto":'.'"'."'".",b.comentario,"."'".'"'."}') SEPARATOR ','),']') etapa_sig,
+                        case when a.estado=1 then 'Activo'
+                                                             else 'Inactivo' end as estado1,
+                                                        DATE_FORMAT(a.fec_creacion, '%d/%m/%Y %h:%i %p') fec_creacion,
+                                                        DATE_FORMAT(a.fec_modificacion, '%d/%m/%Y %h:%i %p') fec_modificacion
+                        from etapa a 
+                        LEFT JOIN etapa_next b ON a.id=b.id_etapa
+                        LEFT JOIN etapa c ON c.id=b.etapa_next
+GROUP BY a.id,a.nombre,a.estado
+
+";
+              //  var_dump($sql);
+                break;
+
+            //------------------------------------------------------------------------------//
+            case 'ListarPromociones':
+                $sql="SELECT a.*, 
+                        (case 
+                            when a.tipo_promo='temporada' then (SELECT group_concat(CONCAT('<li>',nombre) SEPARATOR '</li>')  FROM temporada b WHERE FIND_IN_SET(b.id, a.id_tipo) > 0)
+                            when a.tipo_promo='subcategoria' then (SELECT group_concat(CONCAT('<li>',nombre) SEPARATOR '</li>')  FROM subcategoria b WHERE FIND_IN_SET(b.id, a.id_tipo) > 0)	
+                            when a.tipo_promo='categoria' then (SELECT group_concat(CONCAT('<li>',nombre) SEPARATOR '</li>')  FROM categoria b WHERE FIND_IN_SET(b.id, a.id_tipo) > 0)
+                            when a.tipo_promo='marca' then (SELECT group_concat(CONCAT('<li>',nombre) SEPARATOR '</li>')  FROM marca b WHERE FIND_IN_SET(b.id, a.id_tipo) > 0)
+                            when a.tipo_promo='producto' then (SELECT group_concat(CONCAT('<li>',nombre) SEPARATOR '</li>')  FROM inventario b WHERE FIND_IN_SET(b.id, a.id_tipo) > 0)
+                            end
+                        ) productos,
+                        case when a.estado=1 then 'Activo'
+                             else 'Inactivo' end as estado1,
+                        DATE_FORMAT(a.fecha_creacion, '%d/%m/%Y %h:%i %p') fec_creacion,
+                        DATE_FORMAT(a.fecha_modificacion, '%d/%m/%Y %h:%i %p') fec_modificacion
+                        FROM promociones a
+ ";
+                //  var_dump($sql);
+                break;
+
+            //------------------------------------------------------------------------------//
+            case 'getTipoPromocion':
+                switch ($id){
+                    case 'temporada':
+                        $sql="SELECT id,nombre FROM temporada WHERE estado=1";
+                        break;
+                    case 'subcategoria':
+                        $sql="SELECT id,nombre FROM subcategoria WHERE estado=1";
+                        break;
+                    case 'categoria':
+                        $sql="SELECT id,nombre FROM categoria WHERE estado=1";
+                        break;
+                    case 'marca':
+                        $sql="SELECT id,nombre FROM marca WHERE estado=1";
+                        break;
+                    case 'producto':
+                        $sql="SELECT id,nombre FROM inventario WHERE estado=1";
+                        break;
+                }
+                //  var_dump($sql);
+                break;
+
+            //------------------------------------------------------------------------------//
+            case 'getInvProducto':
+                $sql="SELECT b.nombre,a.*
+                        FROM inventario b
+                        left JOIN inv_entrada a  ON a.id_producto=b.id
+                        WHERE b.id=?
+                        ORDER BY id desc
+								limit 10
+                        ";
+                //  var_dump($sql);
+                break;
+            //------------------------------------------------------------------------------//
             case 'AdminCategoriaActivo':
                 $sql="SELECT a.id, a.nombre
                         from categoria a WHERE a.estado=1";
+                break;
+            //------------------------------------------------------------------------------//
+            case 'getEtapa':
+                $sql="SELECT a.id,a.nombre,b.etapa_next, c.nombre AS etapa_sig, a.estado,
+                        case when a.estado=1 then 'Activo'
+                                                             else 'Inactivo' end as estado1,
+                                                        DATE_FORMAT(a.fec_creacion, '%d/%m/%Y %h:%i %p') fec_creacion,
+                                                        DATE_FORMAT(a.fec_modificacion, '%d/%m/%Y %h:%i %p') fec_modificacion
+                        from etapa a 
+                        LEFT JOIN etapa_next b ON a.id=b.id_etapa
+                        LEFT JOIN etapa c ON c.id=b.etapa_next
+                        where a.id=?";
                 break;
             //------------------------------------------------------------------------------//
             case 'getCategoria':
@@ -65,6 +236,14 @@ class db extends ConexionDB
                                 case when estado=1 then 'Activo'
                                      else 'Inactivo' end as estado1
                         from categoria a where id=?";
+                break;
+            //------------------------------------------------------------------------------//
+            case 'getPromocion':
+                $sql="SELECT a.*, DATE_FORMAT(a.fecha_inicio, '%Y-%m-%d') fec_inicio,
+                                DATE_FORMAT(a.fecha_fin, '%Y-%m-%d') fec_fin,
+                                case when estado=1 then 'Activo'
+                                     else 'Inactivo' end as estado1
+                        from promociones a where id=?";
                 break;
             //------------------------------------------------------------------------------//
             case 'AdminSubCategoria':
@@ -97,7 +276,7 @@ class db extends ConexionDB
                         FROM usuarios u 
                         Left JOIN permisos_usuarios pu ON pu.id_usuario=u.id
                         Left JOIN permisos p ON p.id=pu.id_permiso
-                        where u.id=".$id;
+                        where u.id=?";
                 break;
 
             //------------------------------------------------------------------------------//
@@ -163,10 +342,31 @@ class db extends ConexionDB
             //------------------------------------------------------------------------------//
             case 'getProducto':
                 $sql="SELECT a.*, a.id_marca as marca, 
-                                case when estado=1 then 'Activo'
-                                     else 'Inactivo' end as estado1
-                        from inventario a where id=?";
+                        case when estado=1 then 'Activo'
+                            else 'Inactivo' end as estado1,
+                        GROUP_CONCAT(distinct concat(i.tipo,'|',i.imagen) SEPARATOR '#')	imagen,
+                        GROUP_CONCAT(distinct s.id_subcategoria SEPARATOR '#')	subcategoria,
+                        GROUP_CONCAT(distinct t.id_temporada SEPARATOR '#')	temporada,
+                        GROUP_CONCAT( distinct CONCAT(v.nom_campo,'|',replace(v.valor_campo,'\r\n','<br>')) SEPARATOR '#')	variable
+                        
+                            
+                        from inventario a 
+                        left join inv_imagen i ON i.id_producto=a.id
+                        left JOIN inv_subcategoria s ON s.id_producto=a.id
+                        left JOIN  inv_temporada t ON t.id_producto=a.id
+                        left JOIN inv_variable v ON v.id_producto=a.id
+                        WHERE a.id=?";
                 break;
+            //------------------------------------------------------------------------------//
+            case 'getImgProducto':
+                $sql="SELECT i.*
+                        from inv_imagen i 
+                        WHERE i.id_producto=?";
+
+                break;
+
+
+
     //----------------------------------------------------------------------------------------------//
     //                                                                                              //
     //                                       FIN REGISTRO                                           //
@@ -189,6 +389,14 @@ class db extends ConexionDB
                 case 'getCategoria':
                 case 'getCliente':
                 case 'getSubcategoria':
+                case 'DesactivaProducto':
+                case 'EliminarImgProducto':
+                case 'getImgProducto':
+                case 'getEtapa':
+                case 'getInvProducto':
+                case 'EliminarinvProducto':
+                case 'getPromocion':
+                case 'getusuario':
                     $sentencia->bindParam(1, $id);
                     break;
             }
@@ -207,50 +415,7 @@ class db extends ConexionDB
 
 
 
-        //------------------------------------------------------------------------------------------------------------------------------//
-        protected function CrearInventario($id,$nombre,$descripcion,$tipo, $estado)
-        {
-            if ($id!=0 || $id!='') {
-                $query = "UPDATE cit_inventario
-            set nombre=?,
-                descripcion=?,
-                tipo=?,
-                estado=?
-            WHERE id=?";
-            }else{
-                $query="INSERT INTO cit_inventario (nombre,descripcion,tipo, estado) VALUES (?,?,?,?)";
-            }
 
-
-            try{
-
-                $conexion = ConexionDB::ConexionLocalPDO();
-                $sentencia = $conexion->prepare($query);
-                $sentencia->bindParam(1, $nombre);
-                $sentencia->bindParam(2, $descripcion);
-                $sentencia->bindParam(3, $tipo);
-                $sentencia->bindParam(4, $estado);
-
-                if ($id!=0 || $id!='') {
-                    $sentencia->bindParam(5, $id);
-                }
-
-
-                if($sentencia->execute()){
-
-
-                    return [TRUE,"Se guardo el registro con exito!","Exito"];
-
-
-                }else{
-                    return [FALSE,"Error al guardar el dato error:". $sentencia->errorInfo()[0],$sentencia->errorInfo()];
-                }
-            }catch(PDOException $e){
-                return [FALSE,"Error al obtener los datos",$e->getMessage()];
-            }
-
-
-        }
 
     //------------------------------------------------------------------------------------------------------------------------------//
     protected function CrearCategoria($id, $nombre,$estado)
@@ -322,6 +487,63 @@ class db extends ConexionDB
 
             if($sentencia->execute()){
 
+
+                return [TRUE,"Se guardo el registro con exito!","Exito"];
+
+
+            }else{
+                return [FALSE,"Error al guardar el dato error:". $sentencia->errorInfo()[0],$sentencia->errorInfo()];
+            }
+        }catch(PDOException $e){
+            return [FALSE,"Error al obtener los datos",$e->getMessage()];
+        }
+
+
+    }
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function CrearEtapa($id, $nombre,$etapa_sig,$estado)
+    {
+        if ($id!=0 && $id!='') {
+            $query = "UPDATE etapa
+            set nombre=?,
+                estado=?
+            WHERE id=?";
+        }else{
+            $query="INSERT INTO etapa (nombre,estado) VALUES (?,?)";
+        }
+
+        //var_dump($query);
+        try{
+
+            $conexion = ConexionDB::ConexionLocalPDO();
+            $sentencia = $conexion->prepare($query);
+            $sentencia->bindParam(1, $nombre);
+            $sentencia->bindParam(2, $estado);
+
+            if ($id!=0 && $id!='') {
+                $sentencia->bindParam(3, $id);
+            }
+
+
+            if($sentencia->execute()){
+                if (($id == 0) || ($id == '') || !isset($id)) {
+                    $id=$conexion->lastInsertId();
+                }
+                if($etapa_sig!='' && $etapa_sig!=0){
+                    $query_del="DELETE FROM  etapa_next WHERE id_etapa=?";
+                    $sentencia_del = $conexion->prepare($query_del);
+                    $sentencia_del->bindParam(1, $id);
+                    $sentencia_del->execute();
+                    if (count($etapa_sig)>0) {
+                        for ($i = 0; $i < count($etapa_sig); $i++) {
+                            $query2 = "INSERT INTO etapa_next (id_etapa, etapa_next, comentario) VALUES (?,?,' ')";
+                            $sentencia2 = $conexion->prepare($query2);
+                            $sentencia2->bindParam(1, $id);
+                            $sentencia2->bindParam(2, $etapa_sig[$i]);
+                            $sentencia2->execute();
+                        }
+                    }
+                }
 
                 return [TRUE,"Se guardo el registro con exito!","Exito"];
 
@@ -427,20 +649,22 @@ class db extends ConexionDB
         $queryIns = "INSERT INTO inv_variable (id_producto, nom_campo, valor_campo) values (?,?,?)";
         //var_dump($query);
         try{
-            $adicional=explode(",", $adicionales);
+
             $conexion = ConexionDB::ConexionLocalPDO();
             $sentencia = $conexion->prepare($queryDel);
             $sentencia->bindParam(1, $id);
 
             if($sentencia->execute()){
+                for ($i = 0; $i < count($adicionales); $i++) {
+                    $adicional=explode("|", $adicionales[$i]);
+                    $sentenciaInsert = $conexion->prepare($queryIns);
+                    $sentenciaInsert->bindParam(1, $id);
+                    $sentenciaInsert->bindParam(2, $adicional[0]);
+                    $sentenciaInsert->bindParam(3, $adicional[1]);
+                    $sentenciaInsert->execute();
+                    //var_dump($adicionales);
 
-                $sentenciaInsert = $conexion->prepare($queryIns);
-                $sentenciaInsert->bindParam(1, $id);
-                $sentenciaInsert->bindParam(2, $adicional[0]);
-                $sentenciaInsert->bindParam(3, $adicional[1]);
-                $sentenciaInsert->execute();
-
-
+                }
                 return [TRUE,"Se guardo el registro con exito!","Exito"];
 
            }else{
@@ -488,12 +712,13 @@ class db extends ConexionDB
 
 
     }
-    //------------------------------------------------------------------------------------------------------------------------------//
-    protected function AdicionalImagen($id, $imagen)
-    {
-        $queryDel = "DELETE FROM inv_imagen WHERE id_producto=?";
 
-        $queryIns = "INSERT INTO inv_imagen (id_producto, imagen) values (?,?)";
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function temporada_Producto($id, $temporada)
+    {
+        $queryDel = "DELETE FROM inv_temporada WHERE id_producto=?";
+
+        $queryIns = "INSERT INTO inv_temporada (id_producto, id_temporada) values (?,?)";
         //var_dump($query);
         try{
 
@@ -502,14 +727,15 @@ class db extends ConexionDB
             $sentencia->bindParam(1, $id);
 
             if($sentencia->execute()){
-                for ($i = 0; $i <count($imagen) ; $i++) {
-                    $sentenciaInsert = $conexion->prepare($queryIns);
+
+                $sentenciaInsert = $conexion->prepare($queryIns);
+
+                for ($i = 0; $i <count($temporada) ; $i++) {
                     $sentenciaInsert->bindParam(1, $id);
-                    $sentenciaInsert->bindParam(2, $imagen[$i]);
+                    $sentenciaInsert->bindParam(2, $temporada[$i]);
+
                     $sentenciaInsert->execute();
                 }
-
-
 
                 return [TRUE,"Se guardo el registro con exito!","Exito"];
 
@@ -522,9 +748,40 @@ class db extends ConexionDB
 
 
     }
+    //------------------------------------------------------------------------------------------------------------------------------//
+    protected function AdicionalImagen($id, $imagen, $tipo)
+    {
+
+
+        $queryIns = "INSERT INTO inv_imagen (id_producto, imagen, tipo) values (?,?, ?)";
+        //var_dump($query);
+        try{
+
+            $conexion = ConexionDB::ConexionLocalPDO();
+
+                for ($i = 0; $i <count($imagen) ; $i++) {
+                    $img=base64_encode($imagen[$i]);
+                    $sentenciaInsert = $conexion->prepare($queryIns);
+                    $sentenciaInsert->bindParam(1, $id);
+                    $sentenciaInsert->bindParam(2, $img);
+                    $sentenciaInsert->bindParam(3, $tipo[$i]);
+                    $sentenciaInsert->execute();
+                }
+
+
+
+                return [TRUE,"Se guardo el registro con exito!","Exito"];
+
+
+        }catch(PDOException $e){
+            return [FALSE,"Error al obtener los datos",$e->getMessage()];
+        }
+
+
+    }
 
     //------------------------------------------------------------------------------------------------------------------------------//
-    protected function CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes)
+    protected function CrearProducto($id, $marca,$nombre, $subcategoria,$temporada,$estado, $adicionales, $imagenes, $tipo)
     {
         if ($id!=0 && $id!='') {
             $query = "UPDATE inventario
@@ -547,26 +804,33 @@ class db extends ConexionDB
             $sentencia->bindParam(3, $estado);
 
             if ($id!=0 && $id!='') {
-                $sentencia->bindParam(3, $id);
+                $sentencia->bindParam(4, $id);
             }
 
 
             if($sentencia->execute()){
-                if ($id!=0 && $id!='') {
+
+                if (($id == 0) || ($id == '') || !isset($id)) {
                     $id=$conexion->lastInsertId();
+
                 }
 
                 if (strlen($adicionales)>0){
-                    $adicional=explode("|", $adicionales);
+                    $adicional=explode("#", $adicionales);
                     $this->AdicionalProducto($id, $adicional);
                 }
 
                 if (count($imagenes)>0){
-                    $this->AdicionalImagen($id, $imagenes);
+                    $this->AdicionalImagen($id, $imagenes, $tipo);
                 }
 
                 if (count($subcategoria)>0){
                     $this->SubCategoria_Producto($id, $subcategoria);
+                }
+
+
+                if (count($temporada)>0){
+                    $this->temporada_Producto($id, $temporada);
                 }
 
                 return [TRUE,"Se guardo el registro con exito!","Exito"];
@@ -736,7 +1000,7 @@ class db extends ConexionDB
         try{
             $conexion = ConexionDB::ConexionLocalPDO();
             $sentencia = $conexion->prepare($query);
-            $clav=md5("clinica**".($clave));
+            $clav=md5("Tienda**".($clave));
             $sentencia->bindParam(1, $usuario);
             $sentencia->bindParam(2,  $clav);
 

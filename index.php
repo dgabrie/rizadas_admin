@@ -442,10 +442,7 @@ if (isset($_SESSION['admin']['usuario'])) {
     <script type="text/javascript" src="src/js/plugins.js"></script>
     <!--//max-plugin-->
 
-    <!--scrolling js-->
-    <script src="src/js/jquery.nicescroll.js"></script>
-    <script src="src/js/scripts.js"></script>
-    <!--//scrolling js-->
+
 
     <!-- real-time-updates -->
     <script language="javascript" type="text/javascript" src="src/js/jquery.flot.js"></script>

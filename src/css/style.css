@@ -4,6 +4,17 @@ Author URL: http://w3layouts.com
 License: Creative Commons Attribution 3.0 Unported
 License URL: http://creativecommons.org/licenses/by/3.0/
 */
+@media (min-width: 1200px) {
+    .container {
+        width: 95%;
+    }
+}
+.btn-secondary{
+
+    background-color: #39aed8 !important;
+    border: 1px solid #39aed8 !important;
+    color: #fff;
+}
 
 .ticket-grid{
     min-height: 250px;
@@ -148,7 +159,7 @@ button#showLeftPush {
 .sidebar ul li a {
     color: #FFFFFF;
     font-size: 1em;
-   text-shadow:  black 1px 0 10px;
+   text-shadow:  black 1px 0 3px;
 
 }
 

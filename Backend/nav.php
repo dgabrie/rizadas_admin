@@ -28,6 +28,9 @@
                              <li>
                                  <a class="collapse-item" href="#" onclick="cargar('AdminSubCategoria','adm/subcategoria.php','Controller')"><i class="fa fa-cogs nav_icon"></i> SubCategorias</a>
                              </li>
+                            <li>
+                                <a class="collapse-item" href="#" onclick="cargar('AdminEtapa','adm/etapa.php','Controller')"><i class="fa fa-cogs nav_icon"></i> Etapa</a>
+                            </li>
 
                              <li>
                                  <a class="collapse-item" href="#" onclick="cargar('AdminMarca','adm/marca.php','Controller')"><i class="fa fa-copyright nav_icon"></i> Marca</a>
@@ -42,6 +45,9 @@
                                  <li>
                                      <a class="collapse-item" href="#" onclick="cargar('ListarUsuarios','adm/usuarios.php','Controller')"><i class="fa fa-users nav_icon"></i> Usuarios</a>
                                  </li>
+                            <li>
+                                <a class="collapse-item" href="#" onclick="cargar('ListarPromociones','adm/promociones.php','Controller')"><i class="fa fa-sack-dollar nav_icon"></i> Promociones</a>
+                            </li>
                         </ul>
                     </li>
                         <?php

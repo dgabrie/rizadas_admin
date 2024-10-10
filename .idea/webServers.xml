@@ -2,8 +2,8 @@
 <project version="4">
   <component name="WebServers">
     <option name="servers">
-      <webServer id="ec4c8452-9486-485b-8043-60dca05eca1c" name="cdgabrie_local_raspberry" url="http://192.168.3.81/">
-        <fileTransfer rootFolder="/var/www/html" accessType="SFTP" host="192.168.3.81" port="22" sshConfigId="652a48d7-987f-452e-b36f-f3c23bbcdfc5" sshConfig="dgabrie@192.168.3.81:22 password">
+      <webServer id="01a7807d-3c6c-4bfb-8d69-9877683a820a" name="Rizadas_adm" url="https://adm.rizadashn.com">
+        <fileTransfer rootFolder="/domains/rizadashn.com/public_html/adm" host="88.223.84.151" port="21">
           <advancedOptions>
             <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
           </advancedOptions>
